@@ -104,9 +104,9 @@ The **Perfume Management System** is a **Django-based** web application designed
 
 ## **Screenshots**
 ### **Dashboard View**
-![Dashboard](static/images/dashboard.png)
+![Dashboard](perfume_system/static/images/dashboard.png)
 
 ### **Reports Page**
-![Reports](static/images/reports.png)
+![Reports](perfume_system/static/images/reports.png)
 
 ---
