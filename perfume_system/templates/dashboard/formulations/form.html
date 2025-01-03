@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if formulation %}Edit{% else %}New{% endif %} Formulation{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">
+            {% if formulation %}Edit{% else %}New{% endif %} Formulation
+        </h1>
+
+        <form method="POST" class="bg-white shadow-lg rounded-lg p-6">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+                    Formulation Name
+                </label>
+                <input type="text" name="name" id="name" 
+                       value="{{ formulation.name|default:'' }}"
+                       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                       required>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="version">
+                    Version
+                </label>
+                <input type="text" name="version" id="version" 
+                       value="{{ formulation.version|default:'1.0' }}"
+                       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                       required>
+            </div>
+
+            <div id="ingredients-container" class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    Ingredients
+                </label>
+                <div class="ingredient-row flex space-x-4 mb-2">
+                    <select name="ingredient_ids[]" required
+                            class="shadow appearance-none border rounded flex-grow py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="">Select Ingredient</option>
+                        {% for ingredient in available_ingredients %}
+                            <option value="{{ ingredient.id }}" data-stock="{{ ingredient.current_stock }}">
+                                {{ ingredient.name }} (Stock: {{ ingredient.current_stock }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <input type="number" name="ingredient_quantities[]" required
+                           step="0.01" min="0.01"
+                           class="shadow appearance-none border rounded w-32 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                           placeholder="Quantity">
+                </div>
+            </div>
+
+            <button type="button" id="add-ingredient" 
+                    class="mb-6 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                Add Another Ingredient
+            </button>
+
+            <div class="flex justify-end space-x-4">
+                <a href="{% url 'dashboard:formulations' %}" 
+                   class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Save Formulation
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('add-ingredient').addEventListener('click', function() {
+    const container = document.getElementById('ingredients-container');
+    const template = container.querySelector('.ingredient-row').cloneNode(true);
+    const select = template.querySelector('select');
+    const input = template.querySelector('input');
+    
+    // Clear values
+    select.value = '';
+    input.value = '';
+    
+    // Add event listener for stock checking
+    input.addEventListener('change', checkStock);
+    
+    container.appendChild(template);
+});
+
+function checkStock(event) {
+    const input = event.target;
+    const row = input.closest('.ingredient-row');
+    const select = row.querySelector('select');
+    const selectedOption = select.options[select.selectedIndex];
+    
+    if (selectedOption.value) {  // Only check if an ingredient is selected
+        const stock = parseFloat(selectedOption.dataset.stock);
+        const quantity = parseFloat(input.value || 0);
+        
+        if (quantity > stock) {
+            alert(`Not enough stock. Available: ${stock}`);
+            input.value = stock;
+        }
+    }
+}
+
+// Add stock checking to initial rows
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('input[name="ingredient_quantities[]"]').forEach(input => {
+        input.addEventListener('change', checkStock);
+    });
+});
+</script>
+{% endblock %}

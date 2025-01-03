@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}QA Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white shadow-lg rounded-lg">
+        <div class="p-6">
+            <h1 class="text-3xl font-bold mb-6 text-gray-800">QA Dashboard</h1>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Version</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Created By</th>
+                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for formulation in formulations %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ formulation.name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ formulation.version }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 inline-flex text-xs font-medium rounded-full 
+                                    {% if formulation.status == 'pending_qa' %}bg-yellow-100 text-yellow-800
+                                    {% elif formulation.status == 'approved' %}bg-green-100 text-green-800
+                                    {% elif formulation.status == 'rejected' %}bg-red-100 text-red-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ formulation.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ formulation.created_by.username }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <a href="{% url 'dashboard:qa_approve' formulation.pk %}" 
+                                   class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded">
+                                    Approve
+                                </a>
+                                <a href="{% url 'dashboard:qa_reject' formulation.pk %}" 
+                                   class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded ml-2">
+                                    Reject
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                No pending formulations for review
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

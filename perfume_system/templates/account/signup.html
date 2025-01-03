@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Register | Perfume System</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        {% load static %}
+        <link href="{% static 'css/icons.min.css' %}" rel="stylesheet" type="text/css" />
+        <link href="{% static 'css/app.min.css' %}" rel="stylesheet" type="text/css" id="light-style" />
+        <link href="{% static 'css/app-dark.min.css' %}" rel="stylesheet" type="text/css" id="dark-style" />
+    </head>
+
+    <body class="loading authentication-bg">
+        <div class="account-pages pt-2 pt-sm-5 pb-4 pb-sm-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-xxl-4 col-lg-5">
+                        <div class="card">
+                            <!-- Logo-->
+                            <div class="card-header pt-4 pb-4 text-center bg-primary">
+                                <span class="text-white fs-4">Perfume System</span>
+                            </div>
+
+                            <div class="card-body p-4">
+                                <div class="text-center w-75 m-auto">
+                                    <h4 class="text-dark-50 text-center mt-0 fw-bold">Sign Up</h4>
+                                    <p class="text-muted mb-4">Create your account, it takes less than a minute </p>
+                                </div>
+
+                                <form method="POST" action="{% url 'account_signup' %}">
+                                    {% csrf_token %}
+
+                                    {% if form.errors %}
+                                    <div class="alert alert-danger">
+                                        Please correct the errors below.
+                                        {{ form.errors }}
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="mb-3">
+                                        <label for="id_username" class="form-label">Username</label>
+                                        <input class="form-control" type="text" id="id_username" name="username" 
+                                               placeholder="Enter your username" required>
+                                        {% if form.username.errors %}
+                                            <div class="text-danger">{{ form.username.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="id_email" class="form-label">Email address</label>
+                                        <input class="form-control" type="email" id="id_email" name="email" 
+                                               placeholder="Enter your email" required>
+                                        {% if form.email.errors %}
+                                            <div class="text-danger">{{ form.email.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="id_password1" class="form-label">Password</label>
+                                        <div class="input-group input-group-merge">
+                                            <input type="password" id="id_password1" name="password1" 
+                                                   class="form-control" placeholder="Enter your password">
+                                            <div class="input-group-text" data-password="false">
+                                                <span class="password-eye"></span>
+                                            </div>
+                                        </div>
+                                        {% if form.password1.errors %}
+                                            <div class="text-danger">{{ form.password1.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="id_password2" class="form-label">Confirm Password</label>
+                                        <div class="input-group input-group-merge">
+                                            <input type="password" id="id_password2" name="password2" 
+                                                   class="form-control" placeholder="Confirm your password">
+                                            <div class="input-group-text" data-password="false">
+                                                <span class="password-eye"></span>
+                                            </div>
+                                        </div>
+                                        {% if form.password2.errors %}
+                                            <div class="text-danger">{{ form.password2.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="checkbox-signup" required>
+                                            <label class="form-check-label" for="checkbox-signup">
+                                                I accept the <a href="#" class="text-muted">Terms and Conditions</a>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3 text-center">
+                                        <button class="btn btn-primary" type="submit">Sign Up</button>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12 text-center">
+                                <p class="text-muted">Already have account? 
+                                    <a href="{% url 'account_login' %}" class="text-muted ms-1"><b>Log In</b></a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer footer-alt">
+            2024 © Perfume System
+        </footer>
+
+        <!-- bundle -->
+        <script src="{% static 'js/vendor.min.js' %}"></script>
+        <script src="{% static 'js/app.min.js' %}"></script>
+        
+    </body>
+</html>

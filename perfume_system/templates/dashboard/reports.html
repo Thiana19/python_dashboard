@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <div class="mb-6 flex justify-between items-center">
+        <h1 class="text-2xl font-semibold text-gray-800">Reports & Analytics</h1>
+        <div class="text-sm text-gray-500">Last updated: {% now "F j, Y" %}</div>
+    </div>
+
+    <!-- Formulation Trends Card -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-800">Formulation Trends</h2>
+                    <p class="text-sm text-gray-500">Analysis of formulation status and compliance</p>
+                </div>
+                <a href="{% url 'dashboard:download_formulation_report' %}" 
+                   class="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>Download CSV</span>
+                </a>
+            </div>
+            <div class="p-4">
+                <!-- Status Distribution -->
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-gray-600 mb-2">Status Distribution</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-600">{{ draft_count }}</div>
+                            <div class="text-sm text-gray-600">Draft</div>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-yellow-600">{{ pending_count }}</div>
+                            <div class="text-sm text-gray-600">Pending QA</div>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-green-600">{{ approved_count }}</div>
+                            <div class="text-sm text-gray-600">Approved</div>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-red-600">{{ rejected_count }}</div>
+                            <div class="text-sm text-gray-600">Rejected</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Trend Chart -->
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-600 mb-2">Monthly Trends</h3>
+                    <div class="h-64">
+                        {{ formulation_trend_chart|safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ingredient Usage Card -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-800">Ingredient Usage</h2>
+                    <p class="text-sm text-gray-500">Analysis of ingredient consumption and stock levels</p>
+                </div>
+                <a href="{% url 'dashboard:download_ingredient_report' %}" 
+                   class="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>Download CSV</span>
+                </a>
+            </div>
+            <div class="p-4">
+                <!-- Stock Summary -->
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-gray-600 mb-2">Stock Summary</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-blue-600">{{ total_ingredients }}</div>
+                            <div class="text-sm text-gray-600">Total Ingredients</div>
+                        </div>
+                        <div class="bg-orange-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-orange-600">{{ low_stock_count }}</div>
+                            <div class="text-sm text-gray-600">Low Stock Alert</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Usage Chart -->
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-600 mb-2">Top Used Ingredients</h3>
+                    <div class="h-64">
+                        {{ ingredient_usage_chart|safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Table -->
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="p-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-800">Recent Formulation Activity</h2>
+        </div>
+        <div class="p-4">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created By</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for formulation in recent_formulations %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ formulation.name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if formulation.status == 'approved' %}bg-green-100 text-green-800
+                                    {% elif formulation.status == 'pending_qa' %}bg-yellow-100 text-yellow-800
+                                    {% elif formulation.status == 'rejected' %}bg-red-100 text-red-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ formulation.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formulation.created_by.username }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formulation.created_at|date:"M d, Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

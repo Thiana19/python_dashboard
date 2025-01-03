@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Formulation Details{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-6 flex justify-between items-center">
+        <h1 class="text-2xl font-bold">{{ formulation.name }} - v{{ formulation.version }}</h1>
+        <div>
+            {% if 'rd' in user.roles.all|stringformat:'s' %}
+                <a href="{% url 'dashboard:formulation_edit' formulation.pk %}" 
+                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">
+                    Edit
+                </a>
+                <form method="POST" action="{% url 'dashboard:formulation_submit_qa' formulation.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                        Submit for QA
+                    </button>
+                </form>                
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Basic Information -->
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">Basic Information</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Status</label>
+                    <span class="px-3 py-1 rounded-full text-sm 
+                        {% if formulation.status == 'approved' %}bg-green-100 text-green-800
+                        {% elif formulation.status == 'rejected' %}bg-red-100 text-red-800
+                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                        {{ formulation.get_status_display }}
+                    </span>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Compliance Status</label>
+                    <span class="px-3 py-1 rounded-full text-sm
+                        {% if formulation.compliance_status == 'compliant' %}bg-green-100 text-green-800
+                        {% elif formulation.compliance_status == 'non_compliant' %}bg-red-100 text-red-800
+                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                        {{ formulation.get_compliance_status_display }}
+                    </span>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Created By</label>
+                    <p>{{ formulation.created_by.username }}</p>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Created At</label>
+                    <p>{{ formulation.created_at|date:"F j, Y, P" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ingredients -->
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">Ingredients</h2>
+            <table class="min-w-full">
+                <thead>
+                    <tr>
+                        <th class="text-left">Name</th>
+                        <th class="text-right">Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for formulation_ingredient in formulation.formulation_ingredients.all %}
+                    <tr>
+                        <td class="py-2">{{ formulation_ingredient.ingredient.name }}</td>
+                        <td class="py-2 text-right">{{ formulation_ingredient.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Compliance Issues -->
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">Compliance Issues</h2>
+            {% if compliance_issues %}
+                <ul class="list-disc ml-6">
+                    {% for issue in compliance_issues %}
+                    <li>
+                        <strong>{{ issue.ingredient.name }}</strong>: {{ issue.description }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-gray-700">No compliance issues.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
